@@ -12,13 +12,13 @@
 (function() {
 
     window.k = { }
-    
+
     // logs and reloads
         k.logAndReload = (str, lvl = "log") => {
             console[lvl](str);
             window.setTimeout(() => location.reload(), 500)
         }
-    
+
         k.fetch = async (endPoint) => {
         let response = await fetch(`${_spPageContextInfo.siteAbsoluteUrl}/_api/${endPoint}`, {
             credentials: "include", headers: { accept: "application/json;odata=verbose" }
@@ -28,7 +28,7 @@
             return r ? r.d ? r.d.d ? r.d.d : r.d : r : null
         } else { return null }
     }
-    
+
     // Change web properties - eg, k.ChangeWebProp("Title", "LolSite")
     k.ChangeWebProp = (prop, value) => fetch(`${_spPageContextInfo.webAbsoluteUrl}/_api/web`, {
         method: "MERGE", credentials: "include", headers: {
@@ -38,9 +38,9 @@
     })
         .then(res => res.ok ? k.logAndReload(`Successfully set property \n "${prop}": "${value}"`) : k.logAndReload(`Failed setting "${prop}"`, "err"))
         .then(window.setTimeout(() => location.reload(), 500))
-    
-    
-    
+
+
+
     // Sets the value of a property on a sitefield - eg. the "indexed" property of "Title" - k.SetFieldPropValue("Title","indexed","true")
     k.SetFieldPropValue = (field, prop, value) => fetch(`${_spPageContextInfo.webAbsoluteUrl}/_api/web/fields/GetByInternalNameOrTitle('${field}')`, {
         method: "MERGE",
@@ -51,11 +51,12 @@
         },
         body: `{"__metadata":{"type": "SP.Field"},"${prop}":"${value}"}`
     }).then(res => res.ok ? k.logAndReload(`Successfully set "${prop}" for "${field}" to "${value}"`) : k.logAndReload(`Failed setting "${prop}" on "${field}"`, "err"))
-    
-    
+
+
     // Adds a scriptlink customaction with the given name (key) and url - e.g. k.AddCustomAction("k.lol.js", "/siteassets/js/k.lol.js")
-    k.AddCustomAction = (name, scriptblock) => {
-        let seq = Math.floor(Math.random() * 1000)
+    k.AddCustomAction = (name,scriptblock,sequence) => {
+        let seq = sequence;
+        if(!sequence){ seq = Math.floor(Math.random() * 1000) };
         let ctx = SP.ClientContext.get_current();
         let uc = ctx.get_site().get_userCustomActions();
         let uca = uc.add();
@@ -68,7 +69,7 @@
         uca.update();
         ctx.executeQueryAsync(() => k.logAndReload(`Added CustomAction ${name}`), () => k.logAndReload(`Failed adding customaction ${name}`, "err"));
     }
-    
+
     // Adds a SOD scriptlink customaction with the given name (key) and url - e.g. k.AddCustomAction("k.lol.js", "/siteassets/js/k.lol.js")
     k.AddCustomActionSOD = (name, url) => {
         let seq = Math.floor(Math.random() * 1000)
@@ -84,7 +85,7 @@
         uca.update();
         ctx.executeQueryAsync(() => k.logAndReload(`Added CustomAction ${name}`), () => k.logAndReload(`Failed adding customaction ${name}`, "err"));
     }
-    
+
     // Deletes a custom action by name. If none is specified, lists all customactions
     k.DeleteCustomAction = (customActionName) => {
         let ucaID;
@@ -117,8 +118,8 @@
             }
         });
     }
-    
-    
+
+
     // Enables a web feature by guid
     k.AddWebFeature = (guid) => {
         const ctx = SP.ClientContext.get_current()
@@ -130,8 +131,8 @@
         ctx.load(feats)
         ctx.executeQueryAsync(() => k.logAndReload("enabled suitenav,maybe?"))
     }
-    
-    
+
+
     // Sets the JSLink on a given field - e.g. k.SetJsLinkOnField("Title","/siteassets/jslink/jsLolLink.js")
     k.SetJsLinkOnField = (fieldName, jsLink) => {
         const JSLinkPrefix = "clienttemplates.js|";
@@ -142,12 +143,12 @@
             field.set_jsLink(`${JSLinkPrefix}${jsLink}`);
             field.updateAndPushChanges(true);
             ctx.executeQueryAsync(() => {
-                k.logAndReload(`Set JSLink with url ${jslink} for field ${fieldName}.\n${field.get_jsLink()}`);
+                k.logAndReload(`Set JSLink with url ${jsLink} for field ${fieldName}.\n${field.get_jsLink()}`);
             });
         });
     }
-    
-    
+
+
     // Returns the given jslink for a sitefield
     k.GetJSLinkForField = (fieldName) => {
         const ctx = SP.ClientContext.get_current();
