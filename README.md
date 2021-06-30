@@ -14,8 +14,9 @@ lists out all the web properties.
 
 
 ### Requirements
-Chrome
-A SharePoint Site
+Chromium or Firefox browser  
+Tampermonkey or Greasemonkey  
+A SharePoint Site  
 
 <a href="http://www.wtfpl.net/"><img
        src="http://www.wtfpl.net/wp-content/uploads/2012/12/wtfpl-badge-4.png"
